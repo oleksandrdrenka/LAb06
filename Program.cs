@@ -172,3 +172,45 @@ namespace MusicCollection
             Console.WriteLine($"  дата додавання: {addedDates[index]:dd.MM.yyyy}");
             Console.WriteLine($"  улюблений: {(isFavorites[index] ? "так" : "ні")}");
         }
+
+        static void DeleteById()
+        {
+            Console.Write("Номер треку для видалення: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Потрібно ввести число."); return;
+            }
+
+            int index = IndexOfId(id);
+            if (index == -1)
+            {
+                Console.WriteLine($"Треку №{id} немає."); return;
+            }
+
+            Console.WriteLine($"Видалено трек №{ids[index]} ({artists[index]} - {titles[index]}).");
+
+            for (int i = index; i < count - 1; i++)
+            {
+                ids[i] = ids[i + 1];
+                artists[i] = artists[i + 1];
+                titles[i] = titles[i + 1];
+                years[i] = years[i + 1];
+                durations[i] = durations[i + 1];
+                addedDates[i] = addedDates[i + 1];
+                isFavorites[i] = isFavorites[i + 1];
+            }
+
+            count--;
+
+            ids[count] = 0;
+            artists[count] = "";
+            titles[count] = "";
+            years[count] = 0;
+            durations[count] = 0;
+            addedDates[count] = default;
+            isFavorites[count] = false;
+
+            Console.WriteLine($"Зайнято комірок: {count}/{Capacity}.");
+        }
+    }
+}
