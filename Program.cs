@@ -50,3 +50,125 @@ namespace MusicCollection
 
             Console.WriteLine("Роботу завершено.");
         }
+
+        static void Store(string artist, string title, int year, int duration, DateTime addedDate, bool isFavorite)
+        {
+            ids[count] = nextId;
+            artists[count] = artist;
+            titles[count] = title;
+            years[count] = year;
+            durations[count] = duration;
+            addedDates[count] = addedDate;
+            isFavorites[count] = isFavorite;
+            count++;
+            nextId++;
+        }
+
+        static void Seed()
+        {
+            Store("Queen", "Bohemian Rhapsody", 1975, 354, new DateTime(2025, 10, 10), true);
+            Store("The Beatles", "Hey Jude", 1968, 431, new DateTime(2025, 10, 15), true);
+            Store("Daft Punk", "Get Lucky", 2013, 248, new DateTime(2025, 11, 1), false);
+        }
+
+        static int IndexOfId(int id)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (ids[i] == id) return i;
+            }
+            return -1;
+        }
+
+        static void AddTrack()
+        {
+            if (count >= Capacity)
+            {
+                Console.WriteLine($"Сховище заповнене ({Capacity}).");
+                return;
+            }
+
+            Console.WriteLine("--- Новий трек ---");
+
+            Console.Write("Виконавець: ");
+            string artist = (Console.ReadLine() ?? "").Trim();
+            if (artist.Length == 0) { Console.WriteLine("Порожнє поле."); return; }
+
+            Console.Write("Назва треку: ");
+            string title = (Console.ReadLine() ?? "").Trim();
+            if (title.Length == 0) { Console.WriteLine("Порожнє поле."); return; }
+
+            Console.Write("Рік випуску: ");
+            if (!int.TryParse(Console.ReadLine(), out int year) || year < 1000 || year > DateTime.Now.Year)
+            {
+                Console.WriteLine("Некоректний рік."); return;
+            }
+
+            Console.Write("Тривалість у секундах: ");
+            if (!int.TryParse(Console.ReadLine(), out int duration) || duration <= 0)
+            {
+                Console.WriteLine("Некоректна тривалість."); return;
+            }
+
+            Console.Write("Дата додавання (дд.мм.рррр): ");
+            bool dateOk = DateTime.TryParseExact(
+                Console.ReadLine(), "dd.MM.yyyy",
+                CultureInfo.InvariantCulture, DateTimeStyles.None,
+                out DateTime addedDate
+            );
+            if (!dateOk) { Console.WriteLine("Некоректна дата."); return; }
+
+            Console.Write("Чи в улюблених (так/ні): ");
+            string favInput = (Console.ReadLine() ?? "").Trim().ToLower();
+            bool isFavorite = (favInput == "так" || favInput == "yes" || favInput == "1" || favInput == "true");
+
+            Store(artist, title, year, duration, addedDate, isFavorite);
+            Console.WriteLine($"Додано трек №{ids[count - 1]} у позицію {count - 1}. Зайнято: {count}/{Capacity}.");
+        }
+
+        static void PrintAll()
+        {
+            if (count == 0)
+            {
+                Console.WriteLine("Колекція порожня.");
+                return;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(" № | Виконавець   | Назва        | Рік  | Тривалість | Дата додавання | Улюблений");
+            Console.WriteLine("---+--------------+--------------+------+------------+----------------+----------");
+
+            int totalDuration = 0;
+            for (int i = 0; i < count; i++)
+            {
+                string favStr = isFavorites[i] ? "так" : "ні";
+                Console.WriteLine($"{ids[i],3} | {artists[i],-12} | {titles[i],-12} | {years[i],4} | {durations[i],6} сек  | {addedDates[i]:dd.MM.yyyy}     | {favStr,-9}");
+                totalDuration += durations[i];
+            }
+
+            Console.WriteLine("---+--------------+--------------+------+------------+----------------+----------");
+            Console.WriteLine($"Усього треків: {count}, Загальна тривалість: {totalDuration} сек ({totalDuration / 60} хв {totalDuration % 60} сек).");
+        }
+
+        static void FindById()
+        {
+            Console.Write("Номер треку для пошуку: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Потрібно ввести число."); return;
+            }
+
+            int index = IndexOfId(id);
+            if (index == -1)
+            {
+                Console.WriteLine($"Треку №{id} немає."); return;
+            }
+
+            Console.WriteLine($"Знайдено в позиції {index}:");
+            Console.WriteLine($"  виконавець: {artists[index]}");
+            Console.WriteLine($"  назва: {titles[index]}");
+            Console.WriteLine($"  рік: {years[index]}");
+            Console.WriteLine($"  тривалість: {durations[index]} сек");
+            Console.WriteLine($"  дата додавання: {addedDates[index]:dd.MM.yyyy}");
+            Console.WriteLine($"  улюблений: {(isFavorites[index] ? "так" : "ні")}");
+        }
